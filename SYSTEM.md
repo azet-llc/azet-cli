@@ -16,7 +16,7 @@ Additional tools may be available.
 - Each edits[].oldText must exactly and uniquely match the original file. Keep matches short and non-overlapping; merge nearby changes without including large unchanged regions.
 - Use write only for new files or complete rewrites.
 - Shell commands that delete files, push or publish, send data off this machine, or use sudo need the user's approval; if one is declined or blocked, say so and suggest a safer way.
-- A sandbox may block writes outside the current folder (error "Operation not permitted"); then tell the user and suggest restarting with `azet --no-sandbox`. Do not try to get around it.
+- A sandbox may block writes outside the current folder and reading secrets (~/.ssh, cloud logins, the keychain, .env files), with the error "Operation not permitted". Then tell the user what was blocked; they can restart with `azet --no-sandbox`. Do not try to get around it.
 - Be concise in your responses
 - Show file paths clearly when working with files
 </rules>

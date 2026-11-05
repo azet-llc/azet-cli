@@ -1,5 +1,10 @@
 # azet changelog
 
+## 0.5.0 (2026-11-06)
+- Started in your home folder or /, azet asks for a work folder first (Enter = ~/azet-work); without a terminal it stops with a message.
+- The sandbox also blocks reading secrets: ~/.ssh, ~/.gnupg, ~/.aws, ~/.azure, ~/.kube, gcloud and gh logins, ~/.docker/config.json, ~/.netrc, ~/.git-credentials, azet's key file, the keychain, and .env files anywhere (.env.example and similar templates stay readable).
+- Upstream license texts for the bundled packages that ship none are kept in agent-build/upstream-licenses, including the MIT text for standardwebhooks.
+
 ## 0.4.0 (2026-11-06)
 - Sandbox on by default (macOS): the agent and every command it runs can write only inside the folder you started in, ~/.config/azet, temp folders and package caches. `azet --no-sandbox` or `AZET_SANDBOX=0` turns it off.
 - THIRD_PARTY_NOTICES.md: license texts for every package bundled in the agent and for the Bun runtime, in the repo and next to the agent.

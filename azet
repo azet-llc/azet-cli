@@ -2,7 +2,7 @@
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
 # The agent is our build of Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as azet-agent/.
 set -eu
-VERSION=0.4.0
+VERSION=0.5.0
 HERE=$(cd "$(dirname "$0")" && pwd -P)
 PI="${AZET_PI:-$HERE/azet-agent/azet-agent}"
 case "${1:-}" in
@@ -18,7 +18,9 @@ azet - AI coding agent in your terminal (AZET LLC)
   azet --no-sandbox     let commands write outside this folder (or AZET_SANDBOX=0)
 
 Sandbox (on by default, macOS): the agent can write only inside the folder you
-started it in, ~/.config/azet, temp folders and package caches.
+started it in, ~/.config/azet, temp folders and package caches, and cannot read
+~/.ssh, ~/.aws, other logins, the keychain or .env files. Started in your home
+folder or /, azet asks for a work folder first.
 Shell commands that delete files, push or publish, send data off this machine,
 or use sudo ask before they run (and are blocked in -p mode).
 Key: AZET_API_KEY or ~/.config/azet/key. Credit: https://api.azet.io/#credits
@@ -27,6 +29,21 @@ EOF
     exit 0 ;;
   --help-all) exec "$PI" --help ;;  # needs no key
 esac
+# The agent may write anywhere under the folder it starts in, so not in your home folder or /: pick a work folder.
+HOMEP=$(cd "$HOME" && pwd -P)
+if [ "$(pwd -P)" = "$HOMEP" ] || [ "$(pwd -P)" = / ]; then
+  printf 'azet: you are in %s. Started here, the agent could change any file in it.\n' "$(pwd -P)" >&2
+  if [ ! -t 0 ] || [ ! -t 2 ]; then
+    printf 'azet: cd into a project folder first, e.g. mkdir -p ~/azet-work && cd ~/azet-work\n' >&2; exit 1
+  fi
+  printf 'azet: folder to work in (Enter = ~/azet-work): ' >&2
+  read -r D || D=
+  case "$D" in "") D="$HOME/azet-work" ;; "~") D="$HOME" ;; "~/"*) D="$HOME/${D#\~/}" ;; esac
+  mkdir -p "$D" && cd "$D" || exit 1
+  if [ "$(pwd -P)" = "$HOMEP" ] || [ "$(pwd -P)" = / ]; then printf 'azet: pick a folder inside your home folder\n' >&2; exit 1; fi
+  printf 'azet: working in %s\n' "$(pwd -P)" >&2
+fi
+
 API="${AZET_API_BASE:-https://api.azet.io}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/azet"   # same key file as `npx azet-ai login`
 

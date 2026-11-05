@@ -1,7 +1,8 @@
 # azet-agent 바이너리에 묶이는 서드파티 고지 모음: coding-agent 의 런타임 의존 트리(npm ls --omit=dev) + 소스에 들어온 사본(LICENSES 폴더) + Bun 런타임.
-# 사용: python3 notices.py <pi-src> <bun LICENSE 파일> <출력.md>
+# 사용: python3 notices.py <pi-src> <bun LICENSE 파일> <출력.md> [upstream-licenses 폴더]
 import json, os, subprocess, sys
-root, bun_license, out, upl = sys.argv[1:5]
+root, bun_license, out = sys.argv[1:4]
+upl = sys.argv[4] if len(sys.argv) > 4 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "upstream-licenses")
 # --parseable = every installed package path in the production tree (the --json walk missed deduped branches)
 paths = subprocess.run(["npm", "ls", "--omit=dev", "--all", "--parseable", "-w", "packages/coding-agent"],
                        cwd=root, capture_output=True, text=True).stdout.split()
@@ -31,13 +32,13 @@ lines = ["# Third-party notices for azet-agent", "",
          "Build Bun from source with your changes, then run the steps in agent-build/README.md with that bun.", ""]
 first_party = ("@earendil-works/", "pi-monorepo")
 # packages whose npm tarball ships no license file: the upstream repository's text
-UPSTREAM = {
-    "@aws-sdk/credential-provider-http": ("aws_aws-sdk-js-v3.txt", "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
-    "@aws-sdk/credential-provider-login": ("aws_aws-sdk-js-v3.txt", "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
-    "@aws-sdk/nested-clients": ("aws_aws-sdk-js-v3.txt", "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
-    "data-uri-to-buffer": ("data-uri-to-buffer.txt", "https://github.com/TooTallNate/proxy-agents/blob/main/packages/data-uri-to-buffer/LICENSE"),
-    "proxy-agent-negotiate": ("negotiate.txt", "MIT per package.json (author Nathan Rajlich); upstream has no license file, standard MIT text"),
-    "standardwebhooks": ("standard-webhooks_standard-webhooks.txt", "package.json says MIT; the upstream repository LICENSE (Apache-2.0) is reproduced"),
+UPSTREAM = {  # files in agent-build/upstream-licenses (see its README for sources)
+    "@aws-sdk/credential-provider-http": (["aws-sdk-js-v3-Apache-2.0.txt"], "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
+    "@aws-sdk/credential-provider-login": (["aws-sdk-js-v3-Apache-2.0.txt"], "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
+    "@aws-sdk/nested-clients": (["aws-sdk-js-v3-Apache-2.0.txt"], "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE"),
+    "data-uri-to-buffer": (["data-uri-to-buffer-MIT.txt"], "https://github.com/TooTallNate/proxy-agents/blob/main/packages/data-uri-to-buffer/LICENSE"),
+    "proxy-agent-negotiate": (["proxy-agent-negotiate-MIT.txt"], "MIT per package.json (author Nathan Rajlich); upstream has no license file, standard MIT text"),
+    "standardwebhooks": (["standardwebhooks-MIT.txt", "standard-webhooks-Apache-2.0.txt"], "package.json says MIT, the repository LICENSE says Apache-2.0; both texts"),
 }
 missing, licenses = [], {}
 for (name, ver), (lic, path) in sorted(pkgs.items()):
@@ -54,7 +55,7 @@ for (name, ver), (lic, path) in sorted(pkgs.items()):
             lines += [f"No license file shipped in the package; package.json license: {lic or 'none'}.", ""]
             continue
         f, src = UPSTREAM[name]
-        lines += [f"No license file in the npm package. Text from upstream ({src}):", "", "```", open(os.path.join(upl, f)).read().strip(), "```", ""]
+        lines += [f"No license file in the npm package. Text from upstream ({src}):", "", "```", "\n\n".join(open(os.path.join(upl, x)).read().strip() for x in f), "```", ""]
 for vend in ["packages/schema/LICENSES", "packages/mcp/LICENSES"]:
     for f in sorted(os.listdir(os.path.join(root, vend))):
         lines += [f"## Vendored in Pi: {f}", "", "```", open(os.path.join(root, vend, f)).read().strip(), "```", ""]

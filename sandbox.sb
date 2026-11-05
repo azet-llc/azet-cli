@@ -1,8 +1,10 @@
-;; azet sandbox (macOS sandbox-exec): the agent and every command it runs may read anything,
-;; but may write only to the folder azet started in, azet's own config, temp folders and package caches.
-;; Turn off with `azet --no-sandbox` or AZET_SANDBOX=0.
+;; azet sandbox (macOS sandbox-exec), for the agent and every command it runs:
+;; - writes only to the folder azet started in, azet's own config, temp folders and package caches
+;; - no reading of secrets: SSH/GPG keys, cloud and registry logins, the keychain, and .env files anywhere
+;; Turn off with `azet --no-sandbox` or AZET_SANDBOX=0. In SBPL the last matching rule wins.
 (version 1)
 (allow default)
+
 (deny file-write*)
 (allow file-write*
   (subpath (param "WORK"))
@@ -14,3 +16,23 @@
   (subpath (string-append (param "HOME") "/.cache"))
   (subpath (string-append (param "HOME") "/.bun/install/cache"))
   (subpath (string-append (param "HOME") "/Library/Caches")))
+
+(deny file-read* file-write*
+  (subpath (string-append (param "HOME") "/.ssh"))
+  (subpath (string-append (param "HOME") "/.gnupg"))
+  (subpath (string-append (param "HOME") "/.aws"))
+  (subpath (string-append (param "HOME") "/.azure"))
+  (subpath (string-append (param "HOME") "/.kube"))
+  (subpath (string-append (param "HOME") "/.config/gcloud"))
+  (subpath (string-append (param "HOME") "/.config/gh"))
+  (literal (string-append (param "HOME") "/.docker/config.json"))
+  (literal (string-append (param "HOME") "/.netrc"))
+  (literal (string-append (param "HOME") "/.git-credentials"))
+  (literal (string-append (param "CFG") "/key"))
+  (subpath (string-append (param "HOME") "/Library/Keychains"))
+  (subpath "/Library/Keychains"))
+;; keychain items are served by securityd, not files: `security find-generic-password` fails. HTTPS and git still work.
+(deny mach-lookup (global-name "com.apple.SecurityServer"))
+;; .env files: the agent sees they exist but cannot read them; templates stay readable
+(deny file-read-data (regex #"/\.env$" #"/\.env\.[^/]+$"))
+(allow file-read-data (regex #"/\.env\.(example|sample|template|dist)$"))

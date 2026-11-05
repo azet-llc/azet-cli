@@ -10,4 +10,4 @@ sed -i 's#or \.pi/mcp\.json\.#or .azet/mcp.json.#g' packages/coding-agent/src/ex
 bash scripts/build-binaries.sh --platform darwin-arm64            # bun 1.4.4; also darwin-x64
 ```
 
-Then in the release folder: rename `pi` to `azet-agent`, set `"piConfig": {"name": "azet", "configDir": ".azet"}` in `package.json`, replace `CHANGELOG.md` with azet's, and add `LICENSE-pi` and `THIRD_PARTY_NOTICES.md` (made by `python3 agent-build/notices.py <pi> <bun LICENSE.md> THIRD_PARTY_NOTICES.md <upstream-license-dir>`).
+Then in the release folder: rename `pi` to `azet-agent`, set `"piConfig": {"name": "azet", "configDir": ".azet"}` in `package.json`, replace `CHANGELOG.md` with azet's, and add `LICENSE-pi` and `THIRD_PARTY_NOTICES.md` (made by `python3 agent-build/notices.py <pi> <bun LICENSE.md> THIRD_PARTY_NOTICES.md`; texts for packages that ship no license file are in `agent-build/upstream-licenses/`).
