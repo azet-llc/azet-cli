@@ -121,7 +121,7 @@ Output of <span class="y">`python3 hello.py`</span>:
   <div class="faq">
     <details><summary>Is it open source?</summary><p>Yes. The launcher is MIT, owned by AZET LLC. The agent inside is <a href="https://github.com/earendil-works/pi">Pi</a> by Mario Zechner, also MIT. Both licenses ship in the repo.</p></details>
     <details><summary>What leaves my machine?</summary><p>Your prompts and the file contents the agent reads go to api.azet.io, which passes them to the model provider. Pi's usage telemetry and update checks are switched off.</p></details>
-    <details><summary>Can it run any command?</summary><p>It runs shell commands with your user permissions, the same as you typing them. Start it inside a project folder you trust. A sandbox mode is next on our list.</p></details>
+    <details><summary>Can it run any command?</summary><p>Shell commands that delete files, push or publish, send data off your machine, or use sudo stop and ask you first. In <code>-p</code> mode, where nobody can answer, they are blocked. Everything else runs with your user permissions, so start azet inside a project folder you trust. This is a confirm step, not a sandbox; an OS-level sandbox is next.</p></details>
     <details><summary>Do I need a key?</summary><p>Today, yes: add credit at <a href="https://api.azet.io/#credits">api.azet.io</a> and run <code>AZET_API_KEY=azk_... azet</code>. Free credit on the first run is opening soon; after that, a new install needs no key.</p></details>
     <details><summary>Linux or Windows?</summary><p>macOS today, Apple Silicon and Intel. Linux is next. On Windows, use WSL once the Linux build lands.</p></details>
   </div>

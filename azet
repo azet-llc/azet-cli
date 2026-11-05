@@ -2,6 +2,26 @@
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
 # The agent is Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as libexec/pi.
 set -eu
+VERSION=0.2.0
+case "${1:-}" in
+  -v|--version) echo "azet $VERSION (agent: Pi, MIT)"; exit 0 ;;
+  -h|--help) cat <<'EOF'
+azet - AI coding agent in your terminal (AZET LLC)
+
+  azet                  start in the current folder
+  azet "task"           start with a first message
+  azet -p "task"        run once, print the answer, exit
+  azet --model <id>     pick a model (deepseek-v4.1-flash, moonshotai/Kimi-K2.6, deepseek-v4-pro-0813)
+  azet --continue       continue the last session here
+
+Shell commands that delete files, push or publish, send data off this machine,
+or use sudo ask before they run (and are blocked in -p mode).
+Key: AZET_API_KEY or ~/.config/azet/key. Credit: https://api.azet.io/#credits
+Docs: https://azet-llc.github.io/azet-cli/  ·  Agent: Pi (MIT) - more flags: azet --pi-help
+EOF
+    exit 0 ;;
+  --pi-help) set -- --help ;;
+esac
 API="${AZET_API_BASE:-https://api.azet.io}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/azet"   # same key file as `npx azet-ai login`
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -35,6 +55,8 @@ cat > "$AGENT/models.json" <<EOF
   {"id":"moonshotai/Kimi-K2.6","name":"Kimi K2.6","contextWindow":262144,"maxTokens":16384,"cost":{"input":0.95,"output":4.0,"cacheRead":0.95,"cacheWrite":0.95}},
   {"id":"deepseek-v4-pro-0813","name":"DeepSeek V4 Pro","contextWindow":1000000,"maxTokens":16384,"cost":{"input":1.32,"output":3.96,"cacheRead":1.32,"cacheWrite":1.32}}]}}}
 EOF
-[ -f "$AGENT/settings.json" ] || printf '{"defaultProvider":"azet","defaultModel":"%s"}\n' "${AZET_MODEL:-deepseek-v4.1-flash}" > "$AGENT/settings.json"
+[ -f "$AGENT/settings.json" ] || printf '{"defaultProvider":"azet","defaultModel":"%s","quietStartup":"header"}\n' "${AZET_MODEL:-deepseek-v4.1-flash}" > "$AGENT/settings.json"
+# our header + ask-before-risky-commands gate (azet.ts sits next to this script)
+mkdir -p "$AGENT/extensions" && cp "${AZET_EXT:-$HERE/azet.ts}" "$AGENT/extensions/azet.ts"
 
-PI_CODING_AGENT_DIR="$AGENT" PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"
+AZET_VERSION=$VERSION PI_CODING_AGENT_DIR="$AGENT" PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"
