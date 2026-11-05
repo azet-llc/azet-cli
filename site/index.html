@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>azet · AI coding agent</title>
+<meta name="description" content="An AI coding agent for your terminal. One brew command, no account, no API key. Measured on a clean Mac: 29 seconds to install, 10 seconds to the first working file.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfbfa;--fg:#16181d;--sub:#545a66;--mut:#8a909c;--line:#e6e7ea;--card:#ffffff;--term:#0f1115;--termfg:#e6e8ec;--accent:#2f6fed;--ok:#14a06b;--warn:#c27a06}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0f13;--fg:#eceef2;--sub:#a3a9b5;--mut:#737a87;--line:#232731;--card:#141720;--term:#07080b;--termfg:#e6e8ec;--accent:#6f9bff;--ok:#38c98f;--warn:#e3a33a}}
+:root[data-theme="dark"]{--bg:#0d0f13;--fg:#eceef2;--sub:#a3a9b5;--mut:#737a87;--line:#232731;--card:#141720;--term:#07080b;--termfg:#e6e8ec;--accent:#6f9bff;--ok:#38c98f;--warn:#e3a33a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.65 Inter,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.logo{font:700 18px/1 "JetBrains Mono",monospace;letter-spacing:-.02em;display:flex;gap:8px;align-items:center;color:var(--fg);text-decoration:none}
+nav a.gh{color:var(--sub);text-decoration:none;font-size:14px;display:flex;gap:6px;align-items:center}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+header{padding:56px 0 28px}
+h1{font-size:clamp(34px,6vw,54px);line-height:1.08;letter-spacing:-.035em;font-weight:800;max-width:15ch}
+.lede{color:var(--sub);font-size:18px;max-width:56ch;margin-top:18px}
+.install{margin-top:30px;display:flex;align-items:center;gap:12px;background:var(--term);color:var(--termfg);border-radius:12px;padding:16px 18px;font:15px/1.4 "JetBrains Mono",monospace;max-width:560px}
+.install code{flex:1;overflow-x:auto;white-space:nowrap}
+.install .p{color:#6b7280;user-select:none}
+.copy{background:#232733;color:#e6e8ec;border:0;border-radius:8px;padding:7px 11px;font:600 13px Inter,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
+.copy:hover{background:#2e3342}
+.then{color:var(--mut);font-size:14px;margin-top:10px}
+.then code{font-family:"JetBrains Mono",monospace;color:var(--fg)}
+.video{margin:44px 0 0;aspect-ratio:16/9;border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--mut);background:var(--card);text-align:center;padding:20px}
+.video svg.i{width:40px;height:40px;stroke-width:1.5}
+.video b{color:var(--sub);font-weight:600}
+section{padding:64px 0 0}
+h2{font-size:26px;letter-spacing:-.025em;font-weight:700;margin-bottom:14px}
+p.s{color:var(--sub);max-width:62ch}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+.num{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.num .v{font:700 34px/1 "JetBrains Mono",monospace;letter-spacing:-.03em}
+.num .k{color:var(--sub);font-size:14px;margin-top:8px}
+.note{color:var(--mut);font-size:13px;margin-top:12px}
+.term{background:var(--term);color:var(--termfg);border-radius:12px;padding:18px 20px;font:13.5px/1.7 "JetBrains Mono",monospace;margin-top:20px;overflow-x:auto;white-space:pre}
+.term .c{color:#7d8590}.term .g{color:#5fd39b}.term .y{color:#e6c07b}
+.steps{display:grid;gap:12px;margin-top:22px;counter-reset:s}
+.step{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.step .n{font:700 14px "JetBrains Mono",monospace;color:var(--accent);min-width:20px}
+.step code,.faq code,td code{font-family:"JetBrains Mono",monospace;font-size:.92em}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:15px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600;font-size:13px}
+td.m{font-family:"JetBrains Mono",monospace;font-size:14px}
+.faq{margin-top:18px;display:grid;gap:10px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+.faq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.faq summary::after{content:"+";color:var(--mut)}
+.faq details[open] summary::after{content:"–"}
+.faq p{color:var(--sub);margin-top:8px}
+.final{margin:72px 0 0;padding:36px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.final .install{margin-top:18px}
+footer{color:var(--mut);font-size:13px;padding:48px 0 40px}
+footer a{color:var(--sub)}
+@media (max-width:640px){.nums{grid-template-columns:1fr}.final{padding:22px}header{padding-top:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <a class="logo" href="#"><svg class="i" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>azet</a>
+  <a class="gh" href="https://github.com/azet-llc/azet-cli"><svg class="i" viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>Source on GitHub</a>
+</nav>
+
+<header>
+  <h1>From brew install to working code in under a minute.</h1>
+  <p class="lede">azet is an AI coding agent for your terminal. The first run gives you free credit, so you skip the sign-up form and never paste an API key.</p>
+  <div class="install"><span class="p">$</span><code id="cmd">brew install azet-llc/tap/azet</code><button class="copy" data-copy="brew install azet-llc/tap/azet" aria-label="Copy install command"><svg class="i" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button></div>
+  <p class="then">Then <code>cd your-project &amp;&amp; azet</code> and say what you want built.</p>
+  <div class="video" role="img" aria-label="Demo video placeholder">
+    <svg class="i" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    <b>Demo video, 40 seconds</b>
+    <span>A clean Mac account, from the brew command to a file that runs.</span>
+  </div>
+</header>
+
+<section id="numbers">
+  <h2>Timed on a Mac with nothing on it</h2>
+  <p class="s">We made a fresh macOS user account with Homebrew and nothing else, cleared every download cache, and timed a stranger's first minute. Three install runs, one first task.</p>
+  <div class="nums">
+    <div class="num"><div class="v">28.8s</div><div class="k">brew install to the first screen (median of 3)</div></div>
+    <div class="num"><div class="v">9.8s</div><div class="k">first task: write a file, run it, report the output</div></div>
+    <div class="num"><div class="v">$0.0008</div><div class="k">what that first task cost in model usage</div></div>
+  </div>
+  <p class="note">MacBook Pro M4 Max, macOS user created on Nov 5, 2026, network in Seoul. Install runs took 25.7s, 28.8s and 29.7s.</p>
+  <div class="term"><span class="c">$ azet -p "Create hello.py that prints 'Hello from azet', then run it"</span>
+Created <span class="y">`hello.py`</span> with <span class="y">`print("Hello from azet")`</span>.
+
+Output of <span class="y">`python3 hello.py`</span>:
+<span class="g">Hello from azet</span></div>
+</section>
+
+<section id="how">
+  <h2>What happens on the first run</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div>Homebrew drops one launcher and the agent into its own folder. You do not need Node or Python.</div></div>
+    <div class="step"><span class="n">2</span><div><code>azet</code> asks api.azet.io for a small trial credit and saves the key in <code>~/.config/azet</code>. Your other AI tools keep their own settings.</div></div>
+    <div class="step"><span class="n">3</span><div>The input box opens with a model already picked. Type the task. The agent reads your files, edits them and runs commands to check its work.</div></div>
+  </div>
+</section>
+
+<section id="models">
+  <h2>Models and what they cost</h2>
+  <p class="s">The trial starts on DeepSeek V4.1 Flash. Switch any time with <code>/model</code>. Prices are per million tokens, charged from your credit.</p>
+  <table>
+    <tr><th>Model</th><th>Context</th><th>Input</th><th>Output</th></tr>
+    <tr><td>DeepSeek V4.1 Flash <span style="color:var(--mut)">(default)</span></td><td class="m">1M</td><td class="m">$0.30</td><td class="m">$1.20</td></tr>
+    <tr><td>Kimi K2.6</td><td class="m">262K</td><td class="m">$0.95</td><td class="m">$4.00</td></tr>
+    <tr><td>DeepSeek V4 Pro</td><td class="m">1M</td><td class="m">$1.32</td><td class="m">$3.96</td></tr>
+  </table>
+</section>
+
+<section id="faq">
+  <h2>Before you install</h2>
+  <div class="faq">
+    <details><summary>Is it open source?</summary><p>Yes. The launcher is MIT, owned by AZET LLC. The agent inside is <a href="https://github.com/earendil-works/pi">Pi</a> by Mario Zechner, also MIT. Both licenses ship in the repo.</p></details>
+    <details><summary>What leaves my machine?</summary><p>Your prompts and the file contents the agent reads go to api.azet.io, which passes them to the model provider. Pi's usage telemetry and update checks are switched off.</p></details>
+    <details><summary>Can it run any command?</summary><p>It runs shell commands with your user permissions, the same as you typing them. Start it inside a project folder you trust. A sandbox mode is next on our list.</p></details>
+    <details><summary>What happens when the trial credit runs out?</summary><p>Add credit at <a href="https://api.azet.io/#credits">api.azet.io</a>, or use a key you already have: <code>AZET_API_KEY=azk_... azet</code>.</p></details>
+    <details><summary>Linux or Windows?</summary><p>macOS today, Apple Silicon and Intel. Linux is next. On Windows, use WSL once the Linux build lands.</p></details>
+  </div>
+</section>
+
+<div class="final">
+  <h2>Try it on the project you have open.</h2>
+  <p class="s">One command. No account and no key until you want more credit.</p>
+  <div class="install"><span class="p">$</span><code>brew install azet-llc/tap/azet</code><button class="copy" data-copy="brew install azet-llc/tap/azet" aria-label="Copy install command"><svg class="i" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button></div>
+</div>
+
+<footer>azet by <a href="https://api.azet.io">AZET LLC</a> · <a href="https://github.com/azet-llc/azet-cli">GitHub</a> · <a href="https://api.azet.io/terms">Terms</a> · <a href="https://api.azet.io/privacy">Privacy</a></footer>
+</div>
+<script>
+document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(b.dataset.copy); b.querySelector("span").textContent = "Copied"; setTimeout(() => b.querySelector("span").textContent = "Copy", 1500); } catch {}
+}));
+</script>
+</body>
+</html>
