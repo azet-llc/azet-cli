@@ -1,0 +1,16 @@
+;; azet sandbox (macOS sandbox-exec): the agent and every command it runs may read anything,
+;; but may write only to the folder azet started in, azet's own config, temp folders and package caches.
+;; Turn off with `azet --no-sandbox` or AZET_SANDBOX=0.
+(version 1)
+(allow default)
+(deny file-write*)
+(allow file-write*
+  (subpath (param "WORK"))
+  (subpath (param "CFG"))
+  (subpath "/private/tmp")
+  (subpath "/private/var/folders")
+  (subpath "/dev")
+  (subpath (string-append (param "HOME") "/.npm"))
+  (subpath (string-append (param "HOME") "/.cache"))
+  (subpath (string-append (param "HOME") "/.bun/install/cache"))
+  (subpath (string-append (param "HOME") "/Library/Caches")))

@@ -2,7 +2,7 @@
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
 # The agent is our build of Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as azet-agent/.
 set -eu
-VERSION=0.3.1
+VERSION=0.4.0
 HERE=$(cd "$(dirname "$0")" && pwd -P)
 PI="${AZET_PI:-$HERE/azet-agent/azet-agent}"
 case "${1:-}" in
@@ -15,7 +15,10 @@ azet - AI coding agent in your terminal (AZET LLC)
   azet -p "task"        run once, print the answer, exit
   azet --model <id>     pick a model (deepseek-v4.1-flash, moonshotai/Kimi-K2.6, deepseek-v4-pro-0813)
   azet --continue       continue the last session here
+  azet --no-sandbox     let commands write outside this folder (or AZET_SANDBOX=0)
 
+Sandbox (on by default, macOS): the agent can write only inside the folder you
+started it in, ~/.config/azet, temp folders and package caches.
 Shell commands that delete files, push or publish, send data off this machine,
 or use sudo ask before they run (and are blocked in -p mode).
 Key: AZET_API_KEY or ~/.config/azet/key. Credit: https://api.azet.io/#credits
@@ -63,5 +66,14 @@ rm -f "$AGENT/settings.json.bak"
 mkdir -p "$AGENT/extensions" && cp "${AZET_EXT:-$HERE/azet.ts}" "$AGENT/extensions/azet.ts"
 cp "${AZET_SYSTEM:-$HERE/SYSTEM.md}" "$AGENT/SYSTEM.md"
 
+# sandbox on by default: writes only inside the start folder (see sandbox.sb). --no-sandbox is ours, so drop it before the agent sees it.
+SANDBOX="${AZET_SANDBOX:-1}"
+for a; do shift; [ "$a" = --no-sandbox ] && { SANDBOX=0; continue; }; set -- "$@" "$a"; done
+if [ "$SANDBOX" != 0 ] && [ -x /usr/bin/sandbox-exec ] && [ -f "$HERE/sandbox.sb" ]; then
+  set -- /usr/bin/sandbox-exec -f "$HERE/sandbox.sb" -D WORK="$(pwd -P)" -D CFG="$(cd "$CFG" && pwd -P)" -D HOME="$(cd "$HOME" && pwd -P)" "$PI" "$@"
+else
+  SANDBOX=0; set -- "$PI" "$@"
+fi
+
 # PI_OFFLINE: no install report, version check or model-catalog fetch to pi.dev; model calls still go to api.azet.io
-AZET_VERSION=$VERSION AZET_CODING_AGENT_DIR="$AGENT" PI_OFFLINE=1 PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"
+AZET_SANDBOX=$SANDBOX AZET_VERSION=$VERSION AZET_CODING_AGENT_DIR="$AGENT" PI_OFFLINE=1 PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$@"

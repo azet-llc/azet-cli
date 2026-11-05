@@ -1,5 +1,9 @@
 # azet changelog
 
+## 0.4.0 (2026-11-06)
+- Sandbox on by default (macOS): the agent and every command it runs can write only inside the folder you started in, ~/.config/azet, temp folders and package caches. `azet --no-sandbox` or `AZET_SANDBOX=0` turns it off.
+- THIRD_PARTY_NOTICES.md: license texts for every package bundled in the agent and for the Bun runtime, in the repo and next to the agent.
+
 ## 0.3.1 (2026-11-06)
 - `azet --help-all` works before you have a key; `azet --version` shows only azet's version.
 

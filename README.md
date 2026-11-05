@@ -14,8 +14,9 @@ Free credit on the first run is opening soon. Until then, add credit at https://
 - Models: DeepSeek V4.1 Flash (default), Kimi K2.6, DeepSeek V4 Pro. Switch with `/model`.
 - One-shot: `azet -p "fix the failing test"`.
 - Shell commands that delete files, push or publish, send data off your machine, or use sudo ask before they run (blocked in `-p` mode).
+- Sandbox on by default (macOS `sandbox-exec`): the agent and its commands can write only inside the folder you started in, `~/.config/azet`, temp folders and package caches. Off: `azet --no-sandbox` or `AZET_SANDBOX=0`.
 - Config lives in `~/.config/azet` and never touches other tools' settings.
 
-The agent is our build of [Pi](https://github.com/earendil-works/pi) by Mario Zechner (MIT, see `LICENSE-pi`; patches in `agent-build/`); `azet` is a small launcher that wires it to AZET AI API.
+The agent is our build of [Pi](https://github.com/earendil-works/pi) by Mario Zechner (MIT, see `LICENSE-pi`; patches in `agent-build/`; bundled packages and the Bun runtime in `THIRD_PARTY_NOTICES.md`); `azet` is a small launcher that wires it to AZET AI API.
 
 MIT © AZET LLC

@@ -44,7 +44,7 @@ export default function (pi: ExtensionAPI) {
         "",
         theme.fg("accent", " ▄▀█ ▀█ █▀▀ ▀█▀"),
         theme.fg("accent", " █▀█ █▄ ██▄  █ ") + theme.fg("muted", "  AI coding agent by AZET LLC") + theme.fg("dim", `  v${process.env.AZET_VERSION || "dev"}`),
-        theme.fg("dim", " esc stop · ctrl+l model · ctrl+c twice quit · risky shell commands ask first"),
+        theme.fg("dim", ` esc stop · ctrl+l model · ctrl+c twice quit · risky shell commands ask first · sandbox ${process.env.AZET_SANDBOX === "0" ? "off" : "on: writes stay in this folder"}`),
         "",
       ],
       invalidate() {},
