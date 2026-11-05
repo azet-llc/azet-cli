@@ -1,0 +1,40 @@
+#!/bin/sh
+# azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
+# The agent is Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as libexec/pi.
+set -eu
+API="${AZET_API_BASE:-https://api.azet.io}"
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/azet"   # same key file as `npx azet-ai login`
+HERE=$(cd "$(dirname "$0")" && pwd -P)
+PI="${AZET_PI:-$HERE/../libexec/pi}"
+[ -x "$PI" ] || PI="$HERE/pi"
+
+KEY="${AZET_API_KEY:-}"
+[ -n "$KEY" ] || KEY=$(cat "$CFG/key" 2>/dev/null || true)
+if [ -z "$KEY" ]; then
+  printf 'azet: getting your free trial credit from api.azet.io ...\n' >&2
+  R=$(curl -sS -m 20 -X POST "$API/v1/trial" -H 'user-agent: azet-cli' || true)
+  KEY=$(printf '%s' "$R" | grep -oE 'azk_[0-9a-f]{48}' | head -1 || true)
+  if [ -z "$KEY" ]; then
+    MSG=$(printf '%s' "$R" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p')
+    printf 'azet: %s\nazet: or use your own key: AZET_API_KEY=azk_... azet\n' "${MSG:-could not reach $API}" >&2
+    exit 1
+  fi
+  mkdir -p "$CFG" && (umask 077 && printf '%s\n' "$KEY" > "$CFG/key")
+  printf 'azet: free trial ready ($%s credit). Buy more any time: %s/#credits\n' \
+    "$(printf '%s' "$R" | sed -n 's/.*"balance_usd":\([0-9.]*\).*/\1/p')" "$API" >&2
+fi
+export AZET_API_KEY="$KEY"
+
+# Pi reads its own folder; ours keeps the user's ~/.pi untouched. Key stays in the env, not in the file.
+AGENT="$CFG/agent"; mkdir -p "$AGENT"
+cat > "$AGENT/models.json" <<EOF
+{"providers":{"azet":{"name":"AZET","baseUrl":"$API/v1","api":"openai-completions","apiKey":"\$AZET_API_KEY",
+ "compat":{"supportsDeveloperRole":false,"supportsStore":false,"maxTokensField":"max_tokens"},
+ "models":[
+  {"id":"deepseek-v4.1-flash","name":"DeepSeek V4.1 Flash","contextWindow":1000000,"maxTokens":16384,"cost":{"input":0.3,"output":1.2,"cacheRead":0.3,"cacheWrite":0.3}},
+  {"id":"moonshotai/Kimi-K2.6","name":"Kimi K2.6","contextWindow":262144,"maxTokens":16384,"cost":{"input":0.95,"output":4.0,"cacheRead":0.95,"cacheWrite":0.95}},
+  {"id":"deepseek-v4-pro-0813","name":"DeepSeek V4 Pro","contextWindow":1000000,"maxTokens":16384,"cost":{"input":1.32,"output":3.96,"cacheRead":1.32,"cacheWrite":1.32}}]}}}
+EOF
+[ -f "$AGENT/settings.json" ] || printf '{"defaultProvider":"azet","defaultModel":"%s"}\n' "${AZET_MODEL:-deepseek-v4.1-flash}" > "$AGENT/settings.json"
+
+PI_CODING_AGENT_DIR="$AGENT" PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"
