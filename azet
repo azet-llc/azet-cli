@@ -2,7 +2,7 @@
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
 # The agent is Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as libexec/pi.
 set -eu
-VERSION=0.2.0
+VERSION=0.2.1
 case "${1:-}" in
   -v|--version) echo "azet $VERSION (agent: Pi, MIT)"; exit 0 ;;
   -h|--help) cat <<'EOF'
@@ -55,7 +55,11 @@ cat > "$AGENT/models.json" <<EOF
   {"id":"moonshotai/Kimi-K2.6","name":"Kimi K2.6","contextWindow":262144,"maxTokens":16384,"cost":{"input":0.95,"output":4.0,"cacheRead":0.95,"cacheWrite":0.95}},
   {"id":"deepseek-v4-pro-0813","name":"DeepSeek V4 Pro","contextWindow":1000000,"maxTokens":16384,"cost":{"input":1.32,"output":3.96,"cacheRead":1.32,"cacheWrite":1.32}}]}}}
 EOF
-[ -f "$AGENT/settings.json" ] || printf '{"defaultProvider":"azet","defaultModel":"%s","quietStartup":"header"}\n' "${AZET_MODEL:-deepseek-v4.1-flash}" > "$AGENT/settings.json"
+[ -f "$AGENT/settings.json" ] || printf '{"defaultProvider":"azet","defaultModel":"%s"}\n' "${AZET_MODEL:-deepseek-v4.1-flash}" > "$AGENT/settings.json"
+# quietStartup true: Pi's own header never draws, not even when a signal ends the session (with "header" Pi redraws its logo on SIGTERM)
+if grep -q '"quietStartup"' "$AGENT/settings.json"; then sed -i.bak 's/"quietStartup":[^,}]*/"quietStartup":true/' "$AGENT/settings.json"
+else sed -i.bak 's/^{/{"quietStartup":true,/' "$AGENT/settings.json"; fi
+rm -f "$AGENT/settings.json.bak"
 # our header + ask-before-risky-commands gate (azet.ts sits next to this script)
 mkdir -p "$AGENT/extensions" && cp "${AZET_EXT:-$HERE/azet.ts}" "$AGENT/extensions/azet.ts"
 
