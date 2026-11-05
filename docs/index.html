@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>azet · AI coding agent</title>
-<meta name="description" content="An AI coding agent for your terminal. One brew command, no account, no API key. Measured on a clean Mac: 29 seconds to install, 10 seconds to the first working file.">
+<meta name="description" content="An AI coding agent for your terminal. One brew command installs it. Timed on a clean Mac account: 30 to 45 seconds from brew install to the first working file.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -27,7 +27,9 @@ h1{font-size:clamp(34px,6vw,54px);line-height:1.08;letter-spacing:-.035em;font-w
 .copy{background:#232733;color:#e6e8ec;border:0;border-radius:8px;padding:7px 11px;font:600 13px Inter,sans-serif;cursor:pointer;display:flex;gap:6px;align-items:center}
 .copy:hover{background:#2e3342}
 .then{color:var(--mut);font-size:14px;margin-top:10px}
+.then a{color:var(--accent)}
 .then code{font-family:"JetBrains Mono",monospace;color:var(--fg)}
+.demo{margin:40px 0 0}.demo img{width:100%;height:auto;border-radius:12px;display:block;background:#272822}.demo figcaption{color:var(--mut);font-size:13px;margin-top:10px}
 .video{margin:44px 0 0;aspect-ratio:16/9;border:1.5px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--mut);background:var(--card);text-align:center;padding:20px}
 .video svg.i{width:40px;height:40px;stroke-width:1.5}
 .video b{color:var(--sub);font-weight:600}
@@ -71,25 +73,22 @@ footer a{color:var(--sub)}
 
 <header>
   <h1>From brew install to working code in under a minute.</h1>
-  <p class="lede">azet is an AI coding agent for your terminal. The first run gives you free credit, so you skip the sign-up form and never paste an API key.</p>
+  <p class="lede">azet is an AI coding agent for your terminal. One brew command installs it, and it gets to work in the folder you are in.</p>
   <div class="install"><span class="p">$</span><code id="cmd">brew install azet-llc/tap/azet</code><button class="copy" data-copy="brew install azet-llc/tap/azet" aria-label="Copy install command"><svg class="i" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button></div>
-  <p class="then">Then <code>cd your-project &amp;&amp; azet</code> and say what you want built.</p>
-  <div class="video" role="img" aria-label="Demo video placeholder">
-    <svg class="i" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-    <b>Demo video, 40 seconds</b>
-    <span>A clean Mac account, from the brew command to a file that runs.</span>
-  </div>
+  <p class="then">Then <code>cd your-project &amp;&amp; azet</code> and say what you want built. Free credit on the first run is opening soon; until then, start with credit from <a href="https://api.azet.io/#credits">api.azet.io</a>.</p>
+  <figure class="demo"><img src="azet-demo.gif" width="1058" height="680" alt="Terminal recording: brew install azet-llc/tap/azet, then azet creates and runs hello.py, 44.6 seconds in total">
+    <figcaption>Real recording on a clean Mac account, not sped up: 44.6s from brew install to the first result.</figcaption></figure>
 </header>
 
 <section id="numbers">
   <h2>Timed on a Mac with nothing on it</h2>
-  <p class="s">We made a fresh macOS user account with Homebrew and nothing else, cleared every download cache, and timed a stranger's first minute. Three install runs, one first task.</p>
+  <p class="s">We made a fresh macOS user account with Homebrew and nothing else, cleared every download cache before each run, and timed from <code>brew install</code> to the first answer. Two full runs: 29.8s and 44.6s.</p>
   <div class="nums">
-    <div class="num"><div class="v">28.8s</div><div class="k">brew install to the first screen (median of 3)</div></div>
-    <div class="num"><div class="v">9.8s</div><div class="k">first task: write a file, run it, report the output</div></div>
+    <div class="num"><div class="v">16–19s</div><div class="k">brew install, including a 48 MB download</div></div>
+    <div class="num"><div class="v">10–26s</div><div class="k">first task: write a file, run it, report the output</div></div>
     <div class="num"><div class="v">$0.0008</div><div class="k">what that first task cost in model usage</div></div>
   </div>
-  <p class="note">MacBook Pro M4 Max, macOS user created on Nov 5, 2026, network in Seoul. Install runs took 25.7s, 28.8s and 29.7s.</p>
+  <p class="note">MacBook Pro M4 Max under a heavy build load, network in Seoul, Nov 5–6, 2026. The model's answer time is what varies most between runs.</p>
   <div class="term"><span class="c">$ azet -p "Create hello.py that prints 'Hello from azet', then run it"</span>
 Created <span class="y">`hello.py`</span> with <span class="y">`print("Hello from azet")`</span>.
 
@@ -101,14 +100,14 @@ Output of <span class="y">`python3 hello.py`</span>:
   <h2>What happens on the first run</h2>
   <div class="steps">
     <div class="step"><span class="n">1</span><div>Homebrew drops one launcher and the agent into its own folder. You do not need Node or Python.</div></div>
-    <div class="step"><span class="n">2</span><div><code>azet</code> asks api.azet.io for a small trial credit and saves the key in <code>~/.config/azet</code>. Your other AI tools keep their own settings.</div></div>
+    <div class="step"><span class="n">2</span><div><code>azet</code> reads your key from <code>AZET_API_KEY</code> or <code>~/.config/azet</code>. Once free first-run credit opens, it fetches a trial key there for you. Your other AI tools keep their own settings.</div></div>
     <div class="step"><span class="n">3</span><div>The input box opens with a model already picked. Type the task. The agent reads your files, edits them and runs commands to check its work.</div></div>
   </div>
 </section>
 
 <section id="models">
   <h2>Models and what they cost</h2>
-  <p class="s">The trial starts on DeepSeek V4.1 Flash. Switch any time with <code>/model</code>. Prices are per million tokens, charged from your credit.</p>
+  <p class="s">azet starts on DeepSeek V4.1 Flash. Switch any time with <code>/model</code>. Prices are per million tokens, charged from your credit.</p>
   <table>
     <tr><th>Model</th><th>Context</th><th>Input</th><th>Output</th></tr>
     <tr><td>DeepSeek V4.1 Flash <span style="color:var(--mut)">(default)</span></td><td class="m">1M</td><td class="m">$0.30</td><td class="m">$1.20</td></tr>
@@ -123,14 +122,14 @@ Output of <span class="y">`python3 hello.py`</span>:
     <details><summary>Is it open source?</summary><p>Yes. The launcher is MIT, owned by AZET LLC. The agent inside is <a href="https://github.com/earendil-works/pi">Pi</a> by Mario Zechner, also MIT. Both licenses ship in the repo.</p></details>
     <details><summary>What leaves my machine?</summary><p>Your prompts and the file contents the agent reads go to api.azet.io, which passes them to the model provider. Pi's usage telemetry and update checks are switched off.</p></details>
     <details><summary>Can it run any command?</summary><p>It runs shell commands with your user permissions, the same as you typing them. Start it inside a project folder you trust. A sandbox mode is next on our list.</p></details>
-    <details><summary>What happens when the trial credit runs out?</summary><p>Add credit at <a href="https://api.azet.io/#credits">api.azet.io</a>, or use a key you already have: <code>AZET_API_KEY=azk_... azet</code>.</p></details>
+    <details><summary>Do I need a key?</summary><p>Today, yes: add credit at <a href="https://api.azet.io/#credits">api.azet.io</a> and run <code>AZET_API_KEY=azk_... azet</code>. Free credit on the first run is opening soon; after that, a new install needs no key.</p></details>
     <details><summary>Linux or Windows?</summary><p>macOS today, Apple Silicon and Intel. Linux is next. On Windows, use WSL once the Linux build lands.</p></details>
   </div>
 </section>
 
 <div class="final">
   <h2>Try it on the project you have open.</h2>
-  <p class="s">One command. No account and no key until you want more credit.</p>
+  <p class="s">One command to install. Your first task runs in the folder you already have open.</p>
   <div class="install"><span class="p">$</span><code>brew install azet-llc/tap/azet</code><button class="copy" data-copy="brew install azet-llc/tap/azet" aria-label="Copy install command"><svg class="i" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button></div>
 </div>
 
