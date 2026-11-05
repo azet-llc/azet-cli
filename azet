@@ -2,9 +2,11 @@
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
 # The agent is our build of Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as azet-agent/.
 set -eu
-VERSION=0.3.0
+VERSION=0.3.1
+HERE=$(cd "$(dirname "$0")" && pwd -P)
+PI="${AZET_PI:-$HERE/azet-agent/azet-agent}"
 case "${1:-}" in
-  -v|--version) echo "azet $VERSION (agent: Pi, MIT)"; exit 0 ;;
+  -v|--version) echo "azet $VERSION"; exit 0 ;;
   -h|--help) cat <<'EOF'
 azet - AI coding agent in your terminal (AZET LLC)
 
@@ -20,12 +22,10 @@ Key: AZET_API_KEY or ~/.config/azet/key. Credit: https://api.azet.io/#credits
 Docs: https://azet-llc.github.io/azet-cli/  ·  Agent: our build of Pi (MIT) - all flags: azet --help-all
 EOF
     exit 0 ;;
-  --help-all) set -- --help ;;
+  --help-all) exec "$PI" --help ;;  # needs no key
 esac
 API="${AZET_API_BASE:-https://api.azet.io}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/azet"   # same key file as `npx azet-ai login`
-HERE=$(cd "$(dirname "$0")" && pwd -P)
-PI="${AZET_PI:-$HERE/azet-agent/azet-agent}"
 
 KEY="${AZET_API_KEY:-}"
 [ -n "$KEY" ] || KEY=$(cat "$CFG/key" 2>/dev/null || true)
