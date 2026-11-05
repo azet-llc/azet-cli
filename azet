@@ -1,8 +1,8 @@
 #!/bin/sh
 # azet — AI coding agent on AZET AI API (https://api.azet.io). First run needs no key: it takes a free trial key.
-# The agent is Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as libexec/pi.
+# The agent is our build of Pi (MIT, https://github.com/earendil-works/pi), shipped next to this script as azet-agent/.
 set -eu
-VERSION=0.2.1
+VERSION=0.3.0
 case "${1:-}" in
   -v|--version) echo "azet $VERSION (agent: Pi, MIT)"; exit 0 ;;
   -h|--help) cat <<'EOF'
@@ -17,16 +17,15 @@ azet - AI coding agent in your terminal (AZET LLC)
 Shell commands that delete files, push or publish, send data off this machine,
 or use sudo ask before they run (and are blocked in -p mode).
 Key: AZET_API_KEY or ~/.config/azet/key. Credit: https://api.azet.io/#credits
-Docs: https://azet-llc.github.io/azet-cli/  ·  Agent: Pi (MIT) - more flags: azet --pi-help
+Docs: https://azet-llc.github.io/azet-cli/  ·  Agent: our build of Pi (MIT) - all flags: azet --help-all
 EOF
     exit 0 ;;
-  --pi-help) set -- --help ;;
+  --help-all) set -- --help ;;
 esac
 API="${AZET_API_BASE:-https://api.azet.io}"
 CFG="${XDG_CONFIG_HOME:-$HOME/.config}/azet"   # same key file as `npx azet-ai login`
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-PI="${AZET_PI:-$HERE/../libexec/pi}"
-[ -x "$PI" ] || PI="$HERE/pi"
+PI="${AZET_PI:-$HERE/azet-agent/azet-agent}"
 
 KEY="${AZET_API_KEY:-}"
 [ -n "$KEY" ] || KEY=$(cat "$CFG/key" 2>/dev/null || true)
@@ -45,7 +44,7 @@ if [ -z "$KEY" ]; then
 fi
 export AZET_API_KEY="$KEY"
 
-# Pi reads its own folder; ours keeps the user's ~/.pi untouched. Key stays in the env, not in the file.
+# The agent reads only our folder (~/.config/azet/agent) and a project's .azet/. Key stays in the env, not in the file.
 AGENT="$CFG/agent"; mkdir -p "$AGENT"
 cat > "$AGENT/models.json" <<EOF
 {"providers":{"azet":{"name":"AZET","baseUrl":"$API/v1","api":"openai-completions","apiKey":"\$AZET_API_KEY",
@@ -60,7 +59,9 @@ EOF
 if grep -q '"quietStartup"' "$AGENT/settings.json"; then sed -i.bak 's/"quietStartup":[^,}]*/"quietStartup":true/' "$AGENT/settings.json"
 else sed -i.bak 's/^{/{"quietStartup":true,/' "$AGENT/settings.json"; fi
 rm -f "$AGENT/settings.json.bak"
-# our header + ask-before-risky-commands gate (azet.ts sits next to this script)
+# our header + ask-before-risky-commands gate, and our system prompt (both sit next to this script)
 mkdir -p "$AGENT/extensions" && cp "${AZET_EXT:-$HERE/azet.ts}" "$AGENT/extensions/azet.ts"
+cp "${AZET_SYSTEM:-$HERE/SYSTEM.md}" "$AGENT/SYSTEM.md"
 
-AZET_VERSION=$VERSION PI_CODING_AGENT_DIR="$AGENT" PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"
+# PI_OFFLINE: no install report, version check or model-catalog fetch to pi.dev; model calls still go to api.azet.io
+AZET_VERSION=$VERSION AZET_CODING_AGENT_DIR="$AGENT" PI_OFFLINE=1 PI_SKIP_VERSION_CHECK=1 PI_TELEMETRY=0 exec "$PI" "$@"

@@ -16,6 +16,6 @@ Free credit on the first run is opening soon. Until then, add credit at https://
 - Shell commands that delete files, push or publish, send data off your machine, or use sudo ask before they run (blocked in `-p` mode).
 - Config lives in `~/.config/azet` and never touches other tools' settings.
 
-The agent is [Pi](https://github.com/earendil-works/pi) by Mario Zechner (MIT, see `LICENSE-pi`); `azet` is a small launcher that wires it to AZET AI API.
+The agent is our build of [Pi](https://github.com/earendil-works/pi) by Mario Zechner (MIT, see `LICENSE-pi`; patches in `agent-build/`); `azet` is a small launcher that wires it to AZET AI API.
 
 MIT © AZET LLC

@@ -16,3 +16,10 @@ for (const cmd of ["ls -la", "npm run format", "python3 hello.py", "git status",
   "cat README.md", "npm install", "ssh-keygen -t ed25519", "grep -rn TODO src", "mkdir -p out && cp a b"])
   assert.equal(risk(cmd), undefined, cmd);
 console.log("risk ok");
+// typed habits from Pi: /share, /login, /logout get our answer; everything else passes through
+import { takeOver } from "./azet.ts";
+assert.match(takeOver("/share") ?? "", /does not upload/);
+assert.match(takeOver(" /login openai") ?? "", /AZET key/);
+assert.match(takeOver("/logout") ?? "", /delete/);
+for (const t of ["/shared", "/export", "share this", "/model", "/bug"]) assert.equal(takeOver(t), undefined, t);
+console.log("takeover ok");
